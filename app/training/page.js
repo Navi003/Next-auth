@@ -1,6 +1,14 @@
-import { getTrainings } from '@/lib/training';
+import { veridyAuth } from "@/lib/auth";
+import { getTrainings } from "@/lib/training";
+import { redirect } from "next/dist/server/api-utils";
 
 export default async function TrainingPage() {
+  const result = await veridyAuth();
+
+  if (!result.user) {
+    return redirect("/");
+  }
+
   const trainingSessions = getTrainings();
 
   return (
