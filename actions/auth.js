@@ -1,8 +1,10 @@
 "use server";
 
-import { createAuthSession } from "@/lib/auth";
-import { hashUserPassword } from "@/lib/hashpassword";
-import { createUser } from "@/lib/user";
+import { createAuthSession, destroySession } from "@/lib/auth";
+import { hashUserPassword, verifyPassword } from "@/lib/hashpassword";
+import { createUser, getUserbyEmail } from "@/lib/user";
+import { Lucia } from "lucia";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 //FormData is 2nd argument
@@ -44,4 +46,47 @@ export async function signup(prevState, formData) {
 
     throw error;
   }
+}
+
+export async function login(prevState, formData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  const existingUser = getUserbyEmail(email);
+
+  console.log(existingUser);
+
+  if (!existingUser) {
+    return {
+      errors: {
+        email: "could not find Email Crenedntials",
+      },
+    };
+  }
+
+  const isValidpassword = verifyPassword(existingUser.password, password);
+
+  if (!isValidpassword) {
+    return {
+      errors: {
+        email: "could not find Email Crenedntials",
+      },
+    };
+  }
+
+  await createAuthSession(existingUser.id);
+  redirect("/training");
+}
+
+export async function auth(mode, prevState, formData) {
+  console.log(mode);
+  if (mode === "login") {
+    login(prevState, formData);
+  }
+  return signup(prevState, formData);
+}
+
+export async function logout() {
+  await destroySession();
+  redirect("/");
 }
