@@ -30,7 +30,7 @@ export async function signup(prevState, formData) {
 
   // Store it in Data base
   const hashedPassword = hashUserPassword(password);
-
+  console.log("----- WRON PLACE");
   try {
     const id = createUser(email, hashedPassword);
     await createAuthSession(id);
@@ -81,7 +81,7 @@ export async function login(prevState, formData) {
 export async function auth(mode, prevState, formData) {
   console.log(mode);
   if (mode === "login") {
-    login(prevState, formData);
+    return login(prevState, formData);
   }
   return signup(prevState, formData);
 }
